@@ -72,3 +72,9 @@ https://developer.android.com/guide/topics/appwidgets?hl=ko
 
 - data.go.kr
 - 기상청에서 제공하는 단기예보조회 API를 활동한다.
+- 자세한 정보는 명세서를 참고한다.
+
+https://www.data.go.kr/data/15084084/openapi.do
+
+![](.README_images/open_api.png)
+
