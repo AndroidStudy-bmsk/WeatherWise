@@ -41,6 +41,12 @@ WeatherWise(날씨앱)- Location, Foreground Service, Android Widget, 공공데�
 - Forground 서비스는 계속 진행되는 작업이 중요하며 사용작의 직접적인 인터랙션이 필요하지 않은 경우에 사용된다. 예를 들어 음악 플레이어, GPS 추적, 파일 다운로드
   등의 작업이 이에 해당된다.
 
+## 마지막으로 알려진 위치 가져오기
+
+![](.README_images/last_noti_location.png)
+
+
+
 ## Widget
 
 https://developer.android.com/guide/topics/appwidgets/overview?hl=ko
