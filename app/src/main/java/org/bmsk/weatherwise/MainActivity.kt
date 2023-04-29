@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import org.bmsk.weatherwise.Network.weatherService
+import org.bmsk.weatherwise.data.GeoPointConverter
+import org.bmsk.weatherwise.data.model.BaseDateTime
 import org.bmsk.weatherwise.data.model.Category
 import org.bmsk.weatherwise.data.model.Forecast
 import org.bmsk.weatherwise.data.model.ForecastEntity
@@ -29,18 +31,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val service = weatherService
-        val localDate = LocalDate.now()
-        val hour = LocalTime.now().hour
 
-        val baseHour = if (hour < 2) 2 else hour - (hour - 2) % 3
-        val baseDate = localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-
+        val baseDateTime = BaseDateTime.getBaseDateTime()
+        val converter = GeoPointConverter()
+        val point = converter.convert(lat = 37.5519, lon = 126.9918)
+        Log.d("MainActivity", "${point.nx} ${point.ny}")
         service.getVillageForecast(
             serviceKey = SERVICE_KEY,
-            baseDate = baseDate,
-            baseTime = "${baseHour}00",
-            nx = 55,
-            ny = 127
+            baseDate = baseDateTime.baseDate,
+            baseTime = baseDateTime.baseTime,
+            nx = point.nx,
+            ny = point.ny
         ).enqueue(object : Callback<WeatherEntity> {
             override fun onResponse(call: Call<WeatherEntity>, response: Response<WeatherEntity>) {
                 val forecastDateTimeMap = mutableMapOf<String, Forecast>()
@@ -66,8 +67,6 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-
-                Log.d("Forecast", forecastDateTimeMap.toString())
             }
 
             override fun onFailure(call: Call<WeatherEntity>, t: Throwable) {
