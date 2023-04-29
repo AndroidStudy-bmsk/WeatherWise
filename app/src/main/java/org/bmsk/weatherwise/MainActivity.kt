@@ -1,8 +1,18 @@
 package org.bmsk.weatherwise
 
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.LocationServices
 import org.bmsk.weatherwise.Network.weatherService
 import org.bmsk.weatherwise.data.GeoPointConverter
 import org.bmsk.weatherwise.data.model.BaseDateTime
@@ -21,58 +31,15 @@ import org.bmsk.weatherwise.data.model.WeatherEntity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity() {
+    private val locationPermissionRequest = getLocationPermissionRequest()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val service = weatherService
-
-        val baseDateTime = BaseDateTime.getBaseDateTime()
-        val converter = GeoPointConverter()
-        val point = converter.convert(lat = 37.5519, lon = 126.9918)
-        Log.d("MainActivity", "${point.nx} ${point.ny}")
-        service.getVillageForecast(
-            serviceKey = SERVICE_KEY,
-            baseDate = baseDateTime.baseDate,
-            baseTime = baseDateTime.baseTime,
-            nx = point.nx,
-            ny = point.ny
-        ).enqueue(object : Callback<WeatherEntity> {
-            override fun onResponse(call: Call<WeatherEntity>, response: Response<WeatherEntity>) {
-                val forecastDateTimeMap = mutableMapOf<String, Forecast>()
-
-                val forecastList =
-                    response.body()?.response?.body?.items?.forecastEntities.orEmpty()
-
-                forecastList.forEach { forecast ->
-                    val fKey = "${forecast.forecastDate}/${forecast.forecastTime}"
-
-                    forecastDateTimeMap[fKey] = forecastDateTimeMap.getOrDefault(
-                        fKey, Forecast(
-                            forecastDate = forecast.forecastDate,
-                            forecastTime = forecast.forecastTime
-                        )
-                    ).apply {
-                        when (forecast.category) {
-                            Category.POP -> precipitation = forecast.forecastValue.toInt()
-                            Category.PTY -> precipitationType = transformRainType(forecast)
-                            Category.SKY -> sky = transformSky(forecast)
-                            Category.TMP -> temperature = forecast.forecastValue.toDouble()
-                            else -> {}
-                        }
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<WeatherEntity>, t: Throwable) {
-                t.printStackTrace()
-            }
-        })
+        locationPermissionRequest.launch(arrayOf(ACCESS_COARSE_LOCATION))
     }
 
     private fun transformRainType(forecast: ForecastEntity) =
@@ -92,4 +59,84 @@ class MainActivity : AppCompatActivity() {
             SKY_CLOUDY -> getString(R.string.sky_cloudy)
             else -> ""
         }
+
+    private fun getLocationPermissionRequest() = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        when {
+            permissions.getOrDefault(ACCESS_COARSE_LOCATION, false) -> {
+                updateLocation()
+            }
+
+            else -> {
+                Toast.makeText(
+                    this,
+                    getString(R.string.need_location_permission),
+                    Toast.LENGTH_SHORT
+                ).show()
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("pakage", packageName, null)
+                }
+                startActivity(intent)
+                finish()
+            }
+        }
+    }
+
+    private fun updateLocation() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            locationPermissionRequest.launch(arrayOf(ACCESS_COARSE_LOCATION))
+            return
+        }
+        fusedLocationClient.lastLocation.addOnSuccessListener {
+
+            val baseDateTime = BaseDateTime.getBaseDateTime()
+            val converter = GeoPointConverter()
+            val point = converter.convert(lat = it.latitude, lon = it.longitude)
+            Log.d("MainActivity", "${it.latitude} ${it.longitude}")
+            Log.d("MainActivity", "${point.nx} ${point.ny}")
+            weatherService.getVillageForecast(
+                serviceKey = SERVICE_KEY,
+                baseDate = baseDateTime.baseDate,
+                baseTime = baseDateTime.baseTime,
+                nx = point.nx,
+                ny = point.ny
+            ).enqueue(object : Callback<WeatherEntity> {
+                override fun onResponse(call: Call<WeatherEntity>, response: Response<WeatherEntity>) {
+                    val forecastDateTimeMap = mutableMapOf<String, Forecast>()
+
+                    val forecastList =
+                        response.body()?.response?.body?.items?.forecastEntities.orEmpty()
+
+                    forecastList.forEach { forecast ->
+                        val fKey = "${forecast.forecastDate}/${forecast.forecastTime}"
+
+                        forecastDateTimeMap[fKey] = forecastDateTimeMap.getOrDefault(
+                            fKey, Forecast(
+                                forecastDate = forecast.forecastDate,
+                                forecastTime = forecast.forecastTime
+                            )
+                        ).apply {
+                            when (forecast.category) {
+                                Category.POP -> precipitation = forecast.forecastValue.toInt()
+                                Category.PTY -> precipitationType = transformRainType(forecast)
+                                Category.SKY -> sky = transformSky(forecast)
+                                Category.TMP -> temperature = forecast.forecastValue.toDouble()
+                                else -> {}
+                            }
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<WeatherEntity>, t: Throwable) {
+                    t.printStackTrace()
+                }
+            })
+        }
+    }
 }
