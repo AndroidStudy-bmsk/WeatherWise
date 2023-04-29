@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">WeatherWise</string>
+    <string name="pty_empty">없음</string>
+    <string name="pty_rain">비</string>
+    <string name="pty_rain_snow">비/눈</string>
+    <string name="pty_snow">눈</string>
+    <string name="pty_shower">소나기</string>
+    <string name="sky_sunny">맑음</string>
+    <string name="sky_overcast">구름많음</string>
+    <string name="sky_cloudy">흐림</string>
 </resources>
