@@ -9,18 +9,29 @@ WeatherWise(날씨앱)- Location, Foreground Service, Android Widget, 공공데�
 ### 대략적인 위치 vs 정확한 위치
 
 - 대략적인 위치
-  - ACCESS_COARSE_LOCATION 권한
+  - `ACCESS_COARSE_LOCATION` 권한
   - 런타임 권한
   - 오차범위: 3km 이내
   - 정확한 위치가 필요 없는 경우 사용(날씨앱)
 - 정확한 위치
-  - ACCESS_FINE_LOCATION 권한
+  - `ACCESS_FINE_LOCATION` 권한
   - 런타임 권한
   - 오차범위: 50m 이내
   - Android 12 (API 31) 이후부터 targetSDK가 31 이상인 경우 두 권한을 동시에 요청해야 함
 
 ### Foreground 위치 vs Background 위치
 ![](.README_images/foreground_location.png)
+
+```xml
+<!-- Recommended for Android 9 (API level 28) and lower. -->
+<!-- Required for Android 10 (API level 29) and higher. -->
+<service
+    android:name="MyNavigationService"
+    android:foregroundServiceType="location">
+    <!-- Any inner elements would go here. -->
+</service>
+```
+만일 포그라운드 서비스를 사용한다면 `android:foregroundServiceType="location"`을 명시해야 한다.
 
 ![](.README_images/background_location.png)
 
