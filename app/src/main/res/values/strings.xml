@@ -9,4 +9,7 @@
     <string name="sky_overcast">구름많음</string>
     <string name="sky_cloudy">흐림</string>
     <string name="need_location_permission">위치 권한이 필요합니다.</string>
+
+    <string name="temperature_text">%.1f°</string>
+    <string name="precipitation_text">강수확률: %d%%</string>
 </resources>

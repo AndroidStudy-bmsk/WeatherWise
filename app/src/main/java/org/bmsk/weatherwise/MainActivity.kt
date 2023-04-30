@@ -28,16 +28,19 @@ import org.bmsk.weatherwise.data.model.SKY_CLOUDY
 import org.bmsk.weatherwise.data.model.SKY_OVERCAST
 import org.bmsk.weatherwise.data.model.SKY_SUNNY
 import org.bmsk.weatherwise.data.model.WeatherEntity
+import org.bmsk.weatherwise.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
     private val locationPermissionRequest = getLocationPermissionRequest()
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         locationPermissionRequest.launch(arrayOf(ACCESS_COARSE_LOCATION))
     }
@@ -107,7 +110,11 @@ class MainActivity : AppCompatActivity() {
                 nx = point.nx,
                 ny = point.ny
             ).enqueue(object : Callback<WeatherEntity> {
-                override fun onResponse(call: Call<WeatherEntity>, response: Response<WeatherEntity>) {
+                override fun onResponse(
+                    call: Call<WeatherEntity>,
+                    response: Response<WeatherEntity>
+                ) {
+
                     val forecastDateTimeMap = mutableMapOf<String, Forecast>()
 
                     val forecastList =
@@ -131,6 +138,19 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     }
+
+                    val sortedList = forecastDateTimeMap.values.toMutableList().apply {
+                        sortWith(compareBy { f ->
+                            "${f.forecastDate}/${f.forecastTime}"
+                        })
+                    }
+
+                    val currentForecast = sortedList.first()
+
+                    binding.temperatureTextView.text =
+                        getString(R.string.temperature_text, currentForecast.temperature)
+                    binding.skyTextView.text = currentForecast.weather
+                    binding.precipitationTextView.text = getString(R.string.precipitation_text, currentForecast.precipitation)
                 }
 
                 override fun onFailure(call: Call<WeatherEntity>, t: Throwable) {
