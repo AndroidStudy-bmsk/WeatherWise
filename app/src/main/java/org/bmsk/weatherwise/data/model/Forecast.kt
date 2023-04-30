@@ -15,4 +15,16 @@ data class Forecast(
         } else {
             precipitationType
         }
+
+    val convertedTime: String
+        get() {
+            val hour = forecastTime.substring(0, 2).toInt()
+            val minute = forecastTime.substring(2, 4)
+
+            return if (hour >= 12) {
+                "오후 ${(hour - 12)}시 ${minute}분"
+            } else {
+                "오전 ${hour}시 ${minute}분"
+            }
+        }
 }

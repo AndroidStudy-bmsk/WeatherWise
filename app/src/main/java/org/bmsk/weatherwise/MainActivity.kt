@@ -4,6 +4,7 @@ import android.Manifest
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -29,9 +30,13 @@ import org.bmsk.weatherwise.data.model.SKY_OVERCAST
 import org.bmsk.weatherwise.data.model.SKY_SUNNY
 import org.bmsk.weatherwise.data.model.WeatherEntity
 import org.bmsk.weatherwise.databinding.ActivityMainBinding
+import org.bmsk.weatherwise.databinding.ItemForecastBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.IOException
+import java.lang.IllegalArgumentException
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private val locationPermissionRequest = getLocationPermissionRequest()
@@ -98,6 +103,24 @@ class MainActivity : AppCompatActivity() {
         }
         fusedLocationClient.lastLocation.addOnSuccessListener {
 
+            Thread {
+                try {
+                    val addressList = Geocoder(this, Locale.KOREA).getFromLocation(
+                        it.latitude,
+                        it.longitude,
+                        1
+                    )
+                    runOnUiThread {
+                        binding.locationTextView.text = addressList?.get(0)?.thoroughfare.orEmpty()
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
+            }.start()
+
+
             val baseDateTime = BaseDateTime.getBaseDateTime()
             val converter = GeoPointConverter()
             val point = converter.convert(lat = it.latitude, lon = it.longitude)
@@ -150,7 +173,21 @@ class MainActivity : AppCompatActivity() {
                     binding.temperatureTextView.text =
                         getString(R.string.temperature_text, currentForecast.temperature)
                     binding.skyTextView.text = currentForecast.weather
-                    binding.precipitationTextView.text = getString(R.string.precipitation_text, currentForecast.precipitation)
+                    binding.precipitationTextView.text =
+                        getString(R.string.precipitation_text, currentForecast.precipitation)
+                    binding.childForecastLayout.apply {
+                        sortedList.forEachIndexed { index, f ->
+                            if (index == 0) return@forEachIndexed
+
+                            val itemView = ItemForecastBinding.inflate(layoutInflater)
+                            itemView.timeTextView.text = f.convertedTime
+                            itemView.weatherTextView.text = f.weather
+                            itemView.temperatureTextView.text =
+                                getString(R.string.temperature_text, f.temperature)
+
+                            addView(itemView.root)
+                        }
+                    }
                 }
 
                 override fun onFailure(call: Call<WeatherEntity>, t: Throwable) {
