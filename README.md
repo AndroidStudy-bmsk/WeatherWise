@@ -2,6 +2,10 @@
 
 WeatherWise(날씨앱)- Location, Foreground Service, Android Widget, 공공데이터
 
+![](.README_images/sample.gif)
+
+![](.README_images/widget.jpeg)
+
 ## Location
 
 백그라운드에서 로케이션을 가져올 수 있지만, 큰 제약이 있기 때문에 Foreground Service를 사용하도록 한다.
@@ -9,28 +13,28 @@ WeatherWise(날씨앱)- Location, Foreground Service, Android Widget, 공공데�
 ### 대략적인 위치 vs 정확한 위치
 
 - 대략적인 위치
-  - `ACCESS_COARSE_LOCATION` 권한
-  - 런타임 권한
-  - 오차범위: 3km 이내
-  - 정확한 위치가 필요 없는 경우 사용(날씨앱)
+    - `ACCESS_COARSE_LOCATION` 권한
+    - 런타임 권한
+    - 오차범위: 3km 이내
+    - 정확한 위치가 필요 없는 경우 사용(날씨앱)
 - 정확한 위치
-  - `ACCESS_FINE_LOCATION` 권한
-  - 런타임 권한
-  - 오차범위: 50m 이내
-  - Android 12 (API 31) 이후부터 targetSDK가 31 이상인 경우 두 권한을 동시에 요청해야 함
+    - `ACCESS_FINE_LOCATION` 권한
+    - 런타임 권한
+    - 오차범위: 50m 이내
+    - Android 12 (API 31) 이후부터 targetSDK가 31 이상인 경우 두 권한을 동시에 요청해야 함
 
 ### Foreground 위치 vs Background 위치
+
 ![](.README_images/foreground_location.png)
 
 ```xml
 <!-- Recommended for Android 9 (API level 28) and lower. -->
 <!-- Required for Android 10 (API level 29) and higher. -->
-<service
-    android:name="MyNavigationService"
-    android:foregroundServiceType="location">
+<service android:name="MyNavigationService" android:foregroundServiceType="location">
     <!-- Any inner elements would go here. -->
 </service>
 ```
+
 만일 포그라운드 서비스를 사용한다면 `android:foregroundServiceType="location"`을 명시해야 한다.
 
 ![](.README_images/background_location.png)
@@ -44,8 +48,6 @@ WeatherWise(날씨앱)- Location, Foreground Service, Android Widget, 공공데�
 ## 마지막으로 알려진 위치 가져오기
 
 ![](.README_images/last_noti_location.png)
-
-
 
 ## Widget
 
@@ -84,7 +86,14 @@ https://developer.android.com/guide/topics/appwidgets/overview?hl=ko
 - AppWidgetProviderInfo.xml
   ![](.README_images/app_widget_provider_info_xml.png)
 
-https://developer.android.com/guide/topics/appwidgets?hl=ko
+- PendingIntent: PendingIntent는 안드로이드에서 특별한 인텐트 유형이다. 다른 어플리케이션 구성 요소(예: 알림, 앱 위젯, 시스템 서비스 등)에 권한을
+  부여하여, 이들 구성 요소가 나중에 애플리케이션을 대신하여 특정 작업(예: 액티비티 시작, 서비스 시작, 브로드캐스트 수신)을 수행할 수 있게 한다.
+  https://developer.android.com/guide/topics/appwidgets?hl=ko
+  - 주로 아래와 같은 상황에서 사용
+  - 알람(Notification): 사용자가 알림을 탭하면 애플리케이션의 특정 액티비티를 시작하거나 서비스를 시작하거나, 브로드캐스트를 수신할 수 있다.
+  - 앱 위젯(App Widget): 사용자가 앱 위젯의 요소를 탭할 때 특정 액티비티를 시작하거ㅗ나, 서비스를 시작하거나, 브로드캐스트를 수신할 수 있다.
+  - 시스템 서비스: 시스템 서비스가 예약된 작업을 수행하도록 지시할 때 PendingIntent를 사용할 수 있다.
+  - 기본 인텐트와는 다르게 실행 시점이 지연될 수 있다는 점에서 차이가 있다.
 
 ## 공공 데이터 포털
 
