@@ -12,4 +12,10 @@
 
     <string name="temperature_text">%.1f°</string>
     <string name="precipitation_text">강수확률: %d%%</string>
+    <string name="widget_refresh_channel">widget_refresh_channel</string>
+    <string name="guid_widget_channel">위젯을 업데이트하는 채널</string>
+    <string name="update_weather">날씨 업데이트</string>
+    <string name="setting_permission_button">권한 설정하기</string>
+    <string name="no_permission">권한없음</string>
+    <string name="error">에러</string>
 </resources>
