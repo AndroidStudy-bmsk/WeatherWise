@@ -1,6 +1,5 @@
 package org.bmsk.weatherwise
 
-import android.Manifest
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -35,7 +34,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
-import java.lang.IllegalArgumentException
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {

@@ -81,7 +81,8 @@ https://developer.android.com/guide/topics/appwidgets/overview?hl=ko
 
 - AppWidgetProviderInfo 메타데이터 추가
 
-이 외에도 추가적으로 설정할 것들은 공식 문서를 참고한다.
+- AppWidgetProviderInfo.xml
+  ![](.README_images/app_widget_provider_info_xml.png)
 
 https://developer.android.com/guide/topics/appwidgets?hl=ko
 
